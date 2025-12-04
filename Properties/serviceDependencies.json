@@ -1,0 +1,30 @@
+{
+  "dependencies": {
+    "sqlite1": {
+      "type": "sqlite",
+      "connectionId": "ConnectionStrings:DatabaseConnection",
+      "dynamicId": null
+    },
+    "mssql1": {
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:DefaultConnection1"
+    },
+    "sqlite2": {
+      "type": "sqlite",
+      "connectionId": "ConnectionStrings:DatabaseConnection1",
+      "dynamicId": null
+    },
+    "appInsights1": {
+      "type": "appInsights"
+    },
+    "redis1": {
+      "ignored": "true",
+      "type": "redis"
+    },
+    "mssql2": {
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:DatabaseConnection2",
+      "dynamicId": null
+    }
+  }
+}
