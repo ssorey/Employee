@@ -1,4 +1,5 @@
-﻿using Employee.Models;
+﻿using Employee.Data;
+using Employee.Models;
 using Microsoft.AspNetCore.Mvc;
 
 public interface IEmployeeController
