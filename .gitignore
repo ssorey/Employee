@@ -1,0 +1,12 @@
+## .NET Build Artifacts
+bin/
+obj/
+
+## User-specific files
+*.user
+*.suo
+.vs/
+
+## Secrets and local settings (override with user secrets or env vars)
+appsettings.local.json
+appsettings.*.local.json
