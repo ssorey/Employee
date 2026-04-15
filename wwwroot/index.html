@@ -3,57 +3,355 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Swagger UI</title>
+  <title>Employee AI Assistant</title>
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css" />
   <style>
-    body {
-      margin: 0;
-      padding: 0;
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f2f5; }
+
+    /* Navigation tabs */
+    .tab-bar {
+      background: #1a1a2e;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 4px;
     }
-    #swagger-ui {
+    .tab-bar h1 {
+      color: #e94560;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-right: 24px;
+      padding: 16px 0;
+    }
+    .tab {
+      padding: 16px 20px;
+      color: #aaa;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .tab:hover { color: #fff; }
+    .tab.active { color: #e94560; border-bottom-color: #e94560; }
+
+    /* Panels */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* Swagger panel */
+    #swagger-panel { background: #fff; }
+    #swagger-ui { width: 100%; }
+
+    /* AI Chat panel */
+    #ai-panel {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px 16px;
+    }
+    .ai-hero {
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      color: white;
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .ai-hero h2 { font-size: 1.8rem; margin-bottom: 8px; }
+    .ai-hero p { color: #aaa; font-size: 1rem; }
+    .ai-hero .badge {
+      display: inline-block;
+      background: #e94560;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Quick actions */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .quick-btn {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 14px 16px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+      font-size: 0.85rem;
+      color: #333;
+    }
+    .quick-btn:hover { border-color: #e94560; color: #e94560; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(233,69,96,0.15); }
+    .quick-btn .icon { font-size: 1.2rem; margin-bottom: 6px; display: block; }
+
+    /* Chat area */
+    .chat-container {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    }
+    .chat-messages {
+      height: 400px;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .message {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      max-width: 85%;
+    }
+    .message.user { align-self: flex-end; flex-direction: row-reverse; }
+    .message .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .message.ai .avatar { background: #1a1a2e; color: #e94560; }
+    .message.user .avatar { background: #e94560; color: white; }
+    .message .bubble {
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .message.ai .bubble { background: #f5f5f7; color: #333; }
+    .message.user .bubble { background: #e94560; color: white; }
+    .message.ai.loading .bubble { color: #999; font-style: italic; }
+
+    /* Insights section */
+    .insights-area {
+      padding: 16px 20px;
+      border-top: 1px solid #f0f0f0;
+      background: #fafafa;
+    }
+    .insights-btn {
+      background: none;
+      border: 1px dashed #ccc;
+      border-radius: 8px;
+      padding: 10px 16px;
+      cursor: pointer;
+      color: #666;
+      font-size: 0.85rem;
+      transition: all 0.2s;
       width: 100%;
     }
+    .insights-btn:hover { border-color: #e94560; color: #e94560; background: #fff5f6; }
+
+    /* Chat input */
+    .chat-input-area {
+      padding: 16px;
+      border-top: 1px solid #f0f0f0;
+      display: flex;
+      gap: 10px;
+    }
+    .chat-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid #e0e0e0;
+      border-radius: 24px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .chat-input:focus { border-color: #e94560; }
+    .send-btn {
+      background: #e94560;
+      color: white;
+      border: none;
+      border-radius: 24px;
+      padding: 12px 24px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .send-btn:hover { background: #c73652; }
+    .send-btn:disabled { background: #ccc; cursor: not-allowed; }
   </style>
 </head>
 <body>
-  <div id="swagger-ui"></div>
+  <div class="tab-bar">
+    <h1>⚡ Employee AI</h1>
+    <div class="tab active" onclick="showTab('ai')">🤖 AI Assistant</div>
+    <div class="tab" onclick="showTab('api')">📋 API Explorer</div>
+  </div>
+
+  <!-- AI Chat Panel -->
+  <div id="ai-panel" class="panel active">
+    <div id="ai-panel-inner">
+      <div class="ai-hero">
+        <span class="badge">AI Powered</span>
+        <h2>Employee AI Assistant</h2>
+        <p>Ask anything about your employees in plain English</p>
+      </div>
+
+      <div class="quick-actions">
+        <button class="quick-btn" onclick="sendQuick('List all employees')">
+          <span class="icon">👥</span>List all employees
+        </button>
+        <button class="quick-btn" onclick="sendQuick('How many employees do we have?')">
+          <span class="icon">📊</span>Count employees
+        </button>
+        <button class="quick-btn" onclick="sendQuick('What email domains do our employees use?')">
+          <span class="icon">📧</span>Email domains
+        </button>
+        <button class="quick-btn" onclick="sendQuick('Give me a summary of the team')">
+          <span class="icon">📝</span>Team summary
+        </button>
+      </div>
+
+      <div class="chat-container">
+        <div class="chat-messages" id="chatMessages">
+          <div class="message ai">
+            <div class="avatar">AI</div>
+            <div class="bubble">
+              👋 Hi! I'm your Employee AI Assistant. I can help you query and understand your employee data using natural language. Try asking me something!
+            </div>
+          </div>
+        </div>
+        <div class="insights-area">
+          <button class="insights-btn" onclick="getInsights()">✨ Generate AI insights about my team</button>
+        </div>
+        <div class="chat-input-area">
+          <input
+            type="text"
+            id="chatInput"
+            class="chat-input"
+            placeholder="Ask about your employees..."
+            onkeypress="if(event.key==='Enter') sendMessage()"
+          />
+          <button class="send-btn" id="sendBtn" onclick="sendMessage()">Send →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Swagger API Panel -->
+  <div id="api-panel" class="panel">
+    <div id="swagger-ui"></div>
+  </div>
 
   <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
   <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-standalone-preset.js"></script>
   <script>
-    window.onload = () => {
-      SwaggerUIBundle({
-        url: "https://localhost:5786/swagger/v1/swagger.json", // Update to match your backend
-        dom_id: "#swagger-ui",
-        deepLinking: true,
-        presets: [
-          SwaggerUIBundle.presets.apis,
-          SwaggerUIStandalonePreset
-        ],
-        layout: "BaseLayout"
-      });
-    };
-  </script>
+    let swaggerLoaded = false;
 
-  <!-- OPTIONAL: Test fetch request for debugging -->
-  <script>
-    // Uncomment to test POST request (only for testing, not production use)
-    /*
-    fetch("https://localhost:5786/api/employees", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        firstName: "John",
-        lastName: "Doe",
-        email: "john.doe@example.com"
-      })
-    })
-    .then(res => res.json())
-    .then(data => console.log("Employee Created:", data))
-    .catch(err => console.error("Error:", err));
-    */
+    function showTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+
+      if (tab === 'ai') {
+        document.querySelectorAll('.tab')[0].classList.add('active');
+        document.getElementById('ai-panel').classList.add('active');
+      } else {
+        document.querySelectorAll('.tab')[1].classList.add('active');
+        document.getElementById('api-panel').classList.add('active');
+        if (!swaggerLoaded) {
+          swaggerLoaded = true;
+          SwaggerUIBundle({
+            url: "/swagger/v1/swagger.json",
+            dom_id: '#swagger-ui',
+            deepLinking: true,
+            presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+            layout: "BaseLayout"
+          });
+        }
+      }
+    }
+
+    function appendMessage(role, text, isLoading) {
+      const messages = document.getElementById('chatMessages');
+      const div = document.createElement('div');
+      div.className = `message ${role}${isLoading ? ' loading' : ''}`;
+      div.innerHTML = `
+        <div class="avatar">${role === 'ai' ? 'AI' : 'You'}</div>
+        <div class="bubble">${escapeHtml(text)}</div>
+      `;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+      return div;
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('chatInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+      input.value = '';
+      await chat(msg);
+    }
+
+    async function sendQuick(msg) {
+      await chat(msg);
+    }
+
+    async function chat(message) {
+      const btn = document.getElementById('sendBtn');
+      btn.disabled = true;
+      appendMessage('user', message);
+      const loadingEl = appendMessage('ai', 'Thinking...', true);
+
+      try {
+        const res = await fetch('/api/ai/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message })
+        });
+        const data = await res.json();
+        loadingEl.querySelector('.bubble').innerHTML = escapeHtml(data.reply || data.error || 'No response.');
+        loadingEl.classList.remove('loading');
+      } catch (err) {
+        loadingEl.querySelector('.bubble').innerHTML = 'Error connecting to AI service.';
+        loadingEl.classList.remove('loading');
+      } finally {
+        btn.disabled = false;
+        document.getElementById('chatInput').focus();
+      }
+    }
+
+    async function getInsights() {
+      const btn = document.querySelector('.insights-btn');
+      btn.disabled = true;
+      btn.textContent = '⏳ Generating insights...';
+      const loadingEl = appendMessage('ai', 'Analyzing your employee data...', true);
+
+      try {
+        const res = await fetch('/api/ai/insights');
+        const data = await res.json();
+        loadingEl.querySelector('.bubble').innerHTML = '📊 <strong>Team Insights:</strong><br><br>' + escapeHtml(data.insights || data.error || 'No insights generated.');
+        loadingEl.classList.remove('loading');
+      } catch (err) {
+        loadingEl.querySelector('.bubble').innerHTML = 'Error generating insights.';
+        loadingEl.classList.remove('loading');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '✨ Generate AI insights about my team';
+      }
+    }
   </script>
 </body>
 </html>
